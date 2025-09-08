@@ -1,0 +1,120 @@
+# Example Flet app for a digital menu
+# You need: pip install flet
+
+import flet as ft
+
+# Sample menu data (replace with Google Sheets integration)
+MENU = [
+    {"name": "Pad Thai", "price": 80},
+    {"name": "Green Curry", "price": 90},
+    {"name": "Spring Rolls", "price": 50},
+]
+
+def main(page: ft.Page):
+    page.title = "Restaurant Menu"
+    page.window_width = 1920
+    page.window_height = 1080
+    page.bgcolor = ft.colors.WHITE
+
+    basket = []
+
+    def add_to_basket(e):
+        item = e.control.data
+        basket.append(item)
+        basket_view.controls.append(
+            ft.Text(f"{item['name']} - {item['price']} THB")
+        )
+        page.update()
+
+    def send_order(e):
+        order_text = "Order:\n" + "\n".join(
+            [f"{item['name']} - {item['price']} THB" for item in basket]
+        )
+        # WhatsApp link (replace with your restaurant's phone number)
+        phone = "66812345678"
+        wa_url = f"https://wa.me/{phone}?text={order_text.replace(' ', '%20')}"
+        page.launch_url(wa_url)
+
+    # Top Nav Bar
+    nav_bar = ft.Container(
+        content=ft.Row([
+            ft.Text("Restaurant Name", size=32, weight="bold", color=ft.colors.WHITE),
+            ft.Text("Home", size=20, color=ft.colors.WHITE),
+            ft.Text("Menu", size=20, color=ft.colors.WHITE),
+            ft.Text("Contact", size=20, color=ft.colors.WHITE),
+        ], alignment="spaceBetween"),
+        bgcolor=ft.colors.BLUE_900,
+        padding=20,
+        height=80
+    )
+
+    # Three Menu Content Blocks
+    menu_blocks = ft.Row([
+        ft.Container(
+            content=ft.Column([
+                ft.Text("Menu Block 1", size=24, weight="bold"),
+                *[
+                    ft.Row([
+                        ft.Text(f"{item['name']} - {item['price']} THB"),
+                        ft.ElevatedButton("Add", data=item, on_click=add_to_basket)
+                    ])
+                    for item in MENU
+                ]
+            ]),
+            bgcolor=ft.colors.BLUE_50,
+            padding=20,
+            width=600,
+            border_radius=10
+        ),
+        ft.Container(
+            content=ft.Column([
+                ft.Text("Menu Block 2", size=24, weight="bold"),
+                ft.Text("Specials coming soon!", size=18)
+            ]),
+            bgcolor=ft.colors.GREEN_50,
+            padding=20,
+            width=600,
+            border_radius=10
+        ),
+        ft.Container(
+            content=ft.Column([
+                ft.Text("Menu Block 3", size=24, weight="bold"),
+                ft.Text("Drinks & Desserts", size=18)
+            ]),
+            bgcolor=ft.colors.YELLOW_50,
+            padding=20,
+            width=600,
+            border_radius=10
+        ),
+    ], alignment="spaceEvenly", expand=True)
+
+    # Basket View
+    basket_view = ft.Column([ft.Text("Basket", size=20, weight="bold")])
+
+    # Footer
+    footer = ft.Container(
+        content=ft.Text("© 2025 Restaurant Name. All rights reserved.", size=16, color=ft.colors.WHITE),
+        bgcolor=ft.colors.BLUE_900,
+        padding=20,
+        alignment=ft.alignment.center,
+        height=60
+    )
+
+    # Layout
+    page.add(
+        nav_bar,
+        ft.Row([
+            menu_blocks,
+            ft.Container(
+                content=basket_view,
+                bgcolor=ft.colors.GREY_100,
+                padding=20,
+                width=400,
+                border_radius=10
+            )
+        ], alignment="start", expand=True),
+        ft.ElevatedButton("Send Order via WhatsApp", on_click=send_order),
+        footer
+    )
+
+ft.app(target=main)
